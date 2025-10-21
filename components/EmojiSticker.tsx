@@ -16,6 +16,7 @@ export default function EmojiSticker({ imageSize, stickerSource }: Props) {
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
   const rotate = useSharedValue(0);
+  const savedRotation = useSharedValue(0); // Add this for rotation tracking
 
   const doubleTap = Gesture.Tap()
     .numberOfTaps(2)
@@ -34,9 +35,16 @@ export default function EmojiSticker({ imageSize, stickerSource }: Props) {
     };
   });
 
-  const rotation = Gesture.Rotation().onUpdate((event) => {
-    rotate.value += event.rotation;
-  });
+  const rotation = Gesture.Rotation()
+    .onBegin(() => {
+      savedRotation.value = rotate.value;
+    })
+    .onUpdate((event) => {
+      // Convert rotation to degrees and keep within 0-360
+      const newRotation =
+        (savedRotation.value + (event.rotation * 180) / Math.PI) % 360;
+      rotate.value = withSpring(newRotation);
+    });
 
   const drag = Gesture.Pan().onChange((event) => {
     translateX.value += event.changeX;
@@ -55,7 +63,7 @@ export default function EmojiSticker({ imageSize, stickerSource }: Props) {
           translateY: translateY.value,
         },
         {
-          rotate: `${rotate.value}rad`,
+          rotate: `${rotate.value}deg`, // Changed to degrees
         },
       ],
     };
