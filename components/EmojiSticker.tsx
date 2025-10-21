@@ -15,6 +15,7 @@ export default function EmojiSticker({ imageSize, stickerSource }: Props) {
   const scaleImage = useSharedValue(imageSize);
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
+  const rotate = useSharedValue(0);
 
   const doubleTap = Gesture.Tap()
     .numberOfTaps(2)
@@ -33,10 +34,16 @@ export default function EmojiSticker({ imageSize, stickerSource }: Props) {
     };
   });
 
+  const rotation = Gesture.Rotation().onUpdate((event) => {
+    rotate.value += event.rotation;
+  });
+
   const drag = Gesture.Pan().onChange((event) => {
     translateX.value += event.changeX;
     translateY.value += event.changeY;
   });
+
+  const composed = Gesture.Simultaneous(drag, rotation);
 
   const containerStyle = useAnimatedStyle(() => {
     return {
@@ -47,12 +54,15 @@ export default function EmojiSticker({ imageSize, stickerSource }: Props) {
         {
           translateY: translateY.value,
         },
+        {
+          rotate: `${rotate.value}rad`,
+        },
       ],
     };
   });
 
   return (
-    <GestureDetector gesture={drag}>
+    <GestureDetector gesture={composed}>
       <Animated.View style={[containerStyle, { top: -350 }]}>
         <GestureDetector gesture={doubleTap}>
           <Animated.Image
