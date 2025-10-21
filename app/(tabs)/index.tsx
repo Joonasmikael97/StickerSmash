@@ -74,11 +74,12 @@ export default function Index() {
       console.log(e);
     }
   };
+
   return (
     <GestureHandlerRootView style={styles.container}>
       <View style={styles.container}>
-        <View style={styles.imageContainer}>
-          <View ref={imageRef} collapsable={false}></View>
+        {/* ✅ FIXED: moved ImageViewer and EmojiSticker inside the ref view */}
+        <View style={styles.imageContainer} ref={imageRef} collapsable={false}>
           <ImageViewer
             imgSource={PlaceholderImage}
             selectedImage={selectedImage}
@@ -87,6 +88,7 @@ export default function Index() {
             <EmojiSticker imageSize={40} stickerSource={pickedEmoji} />
           )}
         </View>
+
         {showAppOptions ? (
           <View style={styles.optionsContainer}>
             <View style={styles.optionsRow}>
@@ -113,6 +115,7 @@ export default function Index() {
             />
           </View>
         )}
+
         <EmojiPicker isVisible={isModalVisible} onClose={onModalClose}>
           <EmojiList onSelect={setPickedEmoji} onCloseModal={onModalClose} />
         </EmojiPicker>
@@ -126,6 +129,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#25292e",
     alignItems: "center",
+    justifyContent: "center",
+    paddingTop: 40,
   },
   imageContainer: {
     flex: 1,
