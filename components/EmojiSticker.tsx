@@ -13,8 +13,6 @@ type Props = {
 
 export default function EmojiSticker({ imageSize, stickerSource }: Props) {
   const scaleImage = useSharedValue(imageSize);
-  const translateX = useSharedValue(0);
-  const translateY = useSharedValue(0);
   const rotate = useSharedValue(0);
   const rotationOffset = useSharedValue(0);
 
@@ -40,37 +38,19 @@ export default function EmojiSticker({ imageSize, stickerSource }: Props) {
       rotationOffset.value = rotate.value;
     })
     .onUpdate((event) => {
-      // Multiply by a larger factor for more responsive rotation
-      // and add direction control for more natural feel
-      const rotationFactor = 2.5; // Adjust this value to change rotation sensitivity
+      const rotationFactor = 2.5; // Adjust sensitivity if needed
       const degrees = ((event.rotation * 180) / Math.PI) * rotationFactor;
-
-      // Add continuous rotation without resetting
       rotate.value = rotationOffset.value + degrees;
     });
-
-  const drag = Gesture.Pan().onChange((event) => {
-    translateX.value += event.changeX;
-    translateY.value += event.changeY;
-  });
-
-  const composed = Gesture.Simultaneous(drag, rotation);
 
   const containerStyle = useAnimatedStyle(() => {
     return {
       transform: [
         {
-          translateX: translateX.value,
-        },
-        {
-          translateY: translateY.value,
-        },
-        {
-          // Smoother spring animation with adjusted parameters
           rotate: withSpring(`${rotate.value}deg`, {
-            damping: 30, // Lower damping for more fluid rotation
-            stiffness: 150, // Lower stiffness for less resistance
-            mass: 0.5, // Lower mass for faster response
+            damping: 30,
+            stiffness: 150,
+            mass: 0.5,
           }),
         },
       ],
@@ -78,7 +58,7 @@ export default function EmojiSticker({ imageSize, stickerSource }: Props) {
   });
 
   return (
-    <GestureDetector gesture={composed}>
+    <GestureDetector gesture={rotation}>
       <Animated.View style={[containerStyle, { top: -350 }]}>
         <GestureDetector gesture={doubleTap}>
           <Animated.Image
