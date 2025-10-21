@@ -40,11 +40,13 @@ export default function EmojiSticker({ imageSize, stickerSource }: Props) {
       rotationOffset.value = rotate.value;
     })
     .onUpdate((event) => {
-      const degrees = (event.rotation * 180) / Math.PI;
+      // Multiply by a larger factor for more responsive rotation
+      // and add direction control for more natural feel
+      const rotationFactor = 2.5; // Adjust this value to change rotation sensitivity
+      const degrees = ((event.rotation * 180) / Math.PI) * rotationFactor;
+
+      // Add continuous rotation without resetting
       rotate.value = rotationOffset.value + degrees;
-    })
-    .onEnd(() => {
-      rotationOffset.value = rotate.value;
     });
 
   const drag = Gesture.Pan().onChange((event) => {
@@ -64,9 +66,11 @@ export default function EmojiSticker({ imageSize, stickerSource }: Props) {
           translateY: translateY.value,
         },
         {
+          // Smoother spring animation with adjusted parameters
           rotate: withSpring(`${rotate.value}deg`, {
-            damping: 50,
-            stiffness: 200,
+            damping: 30, // Lower damping for more fluid rotation
+            stiffness: 150, // Lower stiffness for less resistance
+            mass: 0.5, // Lower mass for faster response
           }),
         },
       ],
