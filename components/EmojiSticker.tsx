@@ -1,4 +1,4 @@
-import { ImageSourcePropType } from "react-native";
+import { ImageSourcePropType, StyleSheet } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   useAnimatedStyle,
@@ -44,8 +44,7 @@ export default function EmojiSticker({ imageSize, stickerSource }: Props) {
       rotationOffset.value = rotate.value;
     })
     .onUpdate((event) => {
-      const rotationFactor = 2.5; // adjust sensitivity
-      const degrees = ((event.rotation * 180) / Math.PI) * rotationFactor;
+      const degrees = (event.rotation * 180) / Math.PI; // 1:1 rotation
       rotate.value = rotationOffset.value + degrees;
     });
 
@@ -55,7 +54,7 @@ export default function EmojiSticker({ imageSize, stickerSource }: Props) {
     translateY.value += event.changeY;
   });
 
-  // Animated styles for drag and rotation
+  // Drag style
   const dragStyle = useAnimatedStyle(() => ({
     transform: [
       { translateX: translateX.value },
@@ -63,12 +62,13 @@ export default function EmojiSticker({ imageSize, stickerSource }: Props) {
     ],
   }));
 
+  // Rotation style (spins around its own center)
   const rotationStyle = useAnimatedStyle(() => ({
     transform: [
       {
         rotate: withSpring(`${rotate.value}deg`, {
-          damping: 30,
-          stiffness: 150,
+          damping: 20,
+          stiffness: 120,
           mass: 0.5,
         }),
       },
@@ -77,9 +77,9 @@ export default function EmojiSticker({ imageSize, stickerSource }: Props) {
 
   return (
     <GestureDetector gesture={drag}>
-      <Animated.View style={[dragStyle, { top: -350 }]}>
+      <Animated.View style={[dragStyle]}>
         <GestureDetector gesture={rotation}>
-          <Animated.View style={rotationStyle}>
+          <Animated.View style={[rotationStyle, styles.center]}>
             <GestureDetector gesture={doubleTap}>
               <Animated.Image
                 source={stickerSource}
@@ -93,3 +93,10 @@ export default function EmojiSticker({ imageSize, stickerSource }: Props) {
     </GestureDetector>
   );
 }
+
+const styles = StyleSheet.create({
+  center: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});
